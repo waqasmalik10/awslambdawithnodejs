@@ -1,0 +1,57 @@
+console.log('Loading function');
+// dependencies
+var AWS = require('aws-sdk');
+var crypto = require('crypto');
+
+// Get reference to AWS clients
+var dynamodb = new AWS.DynamoDB();
+
+function getUserPassword(email, fn) {
+    console.log("in getUserPassword Function :"+ email);
+	dynamodb.getItem({
+		//TableName: config.DDB_TABLE,
+		TableName: 'User',
+		Key: {
+			"email": {
+				"S": email
+			}
+		}
+	}, function(err, data) {
+	    console.log("In callback function of getItem");
+		if (err) 
+		{
+		    console.log(err);
+		    console.log("In error while quering the table")
+		    fn(err, null);
+		}
+		else {
+		    console.log("Got data:");
+		    console.log(data);
+			if ('Item' in data) {
+				var password = data.Item.password.S;
+				console.log("Got Password from DB");
+				fn(null, password);
+			} else {
+				console.log("User "+email+" not found"); // User not found
+				fn(null, null);
+			}
+		}
+	});
+}
+
+exports.handler = function(event, context) {
+	var email = event.email;
+	var password = event.password;
+
+	getUserPassword(email, function(err, dbPassword){
+		if(!password || !dbPassword || password!=dbPassword)
+        {
+            context.succeed({login: false});
+        }
+        else 
+        {
+            context.succeed({login: true});
+        }
+    });
+	
+}
