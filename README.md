@@ -6,7 +6,7 @@ Prerequisite
 Node 4.2.6
 ```
 
-First off, run [npm install].
+Firstly, run [npm install].
 
 Secondly, run [node app.js].
 
